@@ -1,0 +1,31 @@
+---
+layout: test
+title: All Unit Tests
+---
+
+<link rel="stylesheet" href="../lib/qunit.css">
+<link rel="stylesheet" href="../lib/tests.css">
+
+<script src="../lib/qunit.js"></script>
+<script src="../lib/pixelmatch.js"></script>
+<script src="../lib/visualTestLoop.js"></script>
+<script src="../lib/visualCallbackQunit.js"></script>
+
+<div id="qunit-testrunner-toolbar"></div>
+<h2 id="qunit-userAgent"></h2>
+<ol id="qunit-tests"></ol>
+
+<canvas id="canvas" width="500" height="500"></canvas>
+<canvas id="static-canvas" width="500" height="500"></canvas>
+
+<script>
+QUnit.config.reorder = false;
+QUnit.testDone(visualCallback.testDone.bind(visualCallback));
+</script>
+
+<script src="text.js"></script>
+<script src="toDataURL.js"></script>
+<script src="svg_import.js"></script>
+<script src="clippath.js"></script>
+<script src="svg_export.js"></script>
+<script src="resize_filter.js"></script>

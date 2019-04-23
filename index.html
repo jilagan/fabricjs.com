@@ -10,7 +10,6 @@ title: Features
   </h1>
   <h4 style="margin: 5px !important">Fabric provides <strong>interactive object model</strong> on top of canvas element</h4>
   <h4 style="margin: 5px !important">Fabric also has <strong>SVG-to-canvas</strong> (and <strong>canvas-to-SVG</strong>) parser</h4>
-
   <div style="position: relative">
     <canvas id="intro-canvas" width="500" height="1850"></canvas>
     <div class="tooltip simple-shapes">
@@ -68,9 +67,16 @@ title: Features
       var canvas = this.__canvas = new fabric.Canvas('intro-canvas');
 
       // simple shapes
-      var rect = new fabric.Rect({ width: 80, height: 60, left: 100, top: 100, fill: '#f55' })
-      var circle = new fabric.Circle({ radius: 30, left: 50, top: 50, fill: 'rgb(50, 205, 50)' });
-      var triangle = new fabric.Triangle({ width: 80, height: 80, left: 150, top: 130, fill: '#55f' });
+      var rect = new fabric.Rect({ width: 80, height: 60, left: 100, top: 100, fill: '#f55', strokeWidth: 0 })
+      var circle = new fabric.Circle({ radius: 30, left: 50, top: 50, fill: 'rgb(50, 205, 50)', strokeWidth: 0 });
+      var triangle = new fabric.Triangle({ width: 80, height: 80, left: 150, top: 130, fill: '#55f', strokeWidth: 0 });
+
+      canvas.add(triangle, rect, circle);
+
+      // simple shapes with border
+      var rect = new fabric.Rect({ width: 79, height: 59, left: 190, top: 100, fill: '#f55', strokeWidth: 1, stroke: 'black' })
+      var circle = new fabric.Circle({ radius: 29.5, left: 140, top: 50, fill: 'rgb(50, 205, 50)', strokeWidth: 1, stroke: 'black' });
+      var triangle = new fabric.Triangle({ width: 79, height: 79, left: 240, top: 130, fill: '#55f', strokeWidth: 1, stroke: 'black' });
 
       canvas.add(triangle, rect, circle);
 
@@ -106,7 +112,7 @@ title: Features
             top: 650
           });
           clone.filters.push(new fabric.Image.filters.Invert());
-          clone.applyFilters(canvas.renderAll.bind(canvas));
+          clone.applyFilters();
           canvas.add(clone);
         });
       });
@@ -133,7 +139,9 @@ title: Features
         shape.set({
           left: 380,
           top: 300,
-          angle: -15
+          angle: -15,
+          originX: 'center',
+          originY: 'center',
         }).scale(0.5);
 
         canvas.add(shape);
@@ -144,7 +152,9 @@ title: Features
         shape.set({
           left: 380,
           top: 400,
-          angle: 15
+          angle: 15,
+          originX: 'center',
+          originY: 'center',
         }).scale(0.75)
 
         canvas.add(shape);
@@ -157,6 +167,7 @@ title: Features
         top: 570,
         angle: -5,
         fontFamily: 'Helvetica',
+        strokeWidth:0,
         fontSize: 20,
         fill: 'red'
       });
@@ -166,7 +177,7 @@ title: Features
         top: 560,
         fontFamily: 'Impact',
         fill: '#eee',
-        strokeWidth: 1,
+        strokeWidth: 2,
         stroke: 'red'
       });
       var text3 = new fabric.Text('multiline text', {
@@ -174,6 +185,7 @@ title: Features
         top: 615,
         angle: -5,
         fontFamily: 'Georgia',
+        strokeWidth:0,
         fontSize: 20,
         fontWeight: 'bold',
         fill: 'green',
@@ -185,7 +197,8 @@ title: Features
         angle: -5,
         fontFamily: 'Courier',
         fontSize: 18,
-        textDecoration: 'underline',
+        underline: true,
+        strokeWidth:0,
         fill: 'blue',
         textAlign: 'center'
       });
@@ -196,6 +209,7 @@ title: Features
         fontFamily: 'Arial',
         fontStyle: 'italic',
         fontSize: 20,
+        strokeWidth:0,
         fill: 'grey',
         textAlign: 'right'
       });
@@ -212,12 +226,13 @@ title: Features
           targetFindTolerance: 4,
           hasControls: false,
           hasBorders: false,
-          hoverCursor: 'pointer'
+          hoverCursor: 'pointer',
+          originX: 'center',
+          originY: 'center',
         })
         .setShadow({ color: 'rgba(0,0,0,0.5)', offsetX: 10, offsetY: 10, blur: 10 });
 
         canvas.add(shape);
-        canvas.calcOffset();
       });
 
       // to svg
@@ -275,51 +290,68 @@ title: Features
           top: 1200,
           lockScalingX: true,
           lockScalingY: true,
-          opacity: 0.75
         })
         .scale(0.25);
-        canvas.add(shape).calcOffset();
+        shape.opacity = 0.75;
+        canvas.add(shape);
 
         shape.clone(function(clone) {
           clone.set('left', 250);
           clone.flipX = true;
           clone.lockMovementY = true;
-          canvas.add(clone).calcOffset();
+          canvas.add(clone);
         });
 
         shape.clone(function(clone) {
           clone.set('left', 400);
           clone.flipY = true;
           clone.lockMovementX = true;
-          canvas.add(clone).calcOffset();
+          canvas.add(clone);
         });
       });
 
       // events
       (function(){
-        var rect = new fabric.Rect({ width: 200, height: 50, fill: '#faa', rx: 10, ry: 10 });
-        var text = new fabric.Text('Do stuff with me!', { fontSize: 20, fontFamily: 'Georgia' });
+        var rect = new fabric.Rect({ width: 200, height: 50, fill: '#faa', rx: 10, ry: 10, strokeWidth:0 });
+        var text = new fabric.Text('Do stuff with me!', { fontSize: 20, fontFamily: 'Georgia', strokeWidth:0 });
         var group = new fabric.Group([ rect, text ], { left: 250, top: 1320 });
-
         canvas.add(group).calcOffset();
-
+window.ooo = text;
         group.on('mousedown', function() {
           text.text = 'Mouse down';
+          group.dirty = true;
         });
         group.on('mouseup', function() {
           text.text = 'Mouse up';
+          group.dirty = true;
         });
         group.on('scaling', function() {
           text.text = 'Scaling';
+          group.dirty = true;
         });
         group.on('moving', function() {
           text.text = 'Moving';
+          group.dirty = true;
         });
         group.on('rotating', function() {
           text.text = 'Rotating';
+          group.dirty = true;
         });
         group.on('mousemove', function() {
           text.text = 'Mouse move';
+          group.dirty = true;
+        });
+        group.on('mouseover', function() {
+          text.text = 'Mouse over';
+          group.dirty = true;
+        });
+        group.on('mouseout', function() {
+          text.text = 'Mouse out';
+          group.dirty = true;
+        });
+        group.on('skewing', function() {
+          text.text = 'skewing';
+          group.dirty = true;
         });
       })();
 
@@ -337,24 +369,25 @@ title: Features
       });
 
       // patterns
-
-      var text = new fabric.Text('Patterns', {
-        fontSize: 150,
-        left: 250,
-        top: 1600,
-        fontFamily: 'Impact'
-      });
       fabric.util.loadImage('assets/retina_wood.png', function(img) {
-        text.fill = new fabric.Pattern({
+        var pattern = new fabric.Pattern({
           source: img,
           repeat: 'repeat'
         });
-        canvas.renderAll();
+        var text = new fabric.Text('Patterns', {
+          fontSize: 150,
+          left: 250,
+          top: 1600,
+          strokeWidth: 2,
+          stroke: 'black',
+          fontFamily: 'Impact',
+          fill: pattern
+        });
+        canvas.add(text);
       });
-      canvas.add(text);
 
       // free drawing
-      var path = {"type":"path","originX":"center","originY":"center","left":173,"top":1800,"width":232,"height":49,"fill":null,"overlayFill":null,"stroke":"#aaf","strokeWidth":10,"strokeDashArray":null,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"selectable":true,"hasControls":true,"hasBorders":true,"hasRotatingPoint":true,"transparentCorners":true,"perPixelTargetFind":false,"shadow":{"color":"#aaf","blur":0,"offsetX":0,"offsetY":0},"visible":true,"path":[["M",0,42],["Q",0,42,0,42],["Q",0,42,0.5,42],["Q",1,42,1,41.5],["Q",1,41,3,39],["Q",5,37,10.5,31],["Q",16,25,24.5,18],["Q",33,11,37,8],["Q",41,5,45.5,2.5],["Q",50,0,52.5,0],["Q",55,0,57,0],["Q",59,0,60,3],["Q",61,6,64,19.5],["Q",67,33,68,37],["Q",69,41,69.5,44],["Q",70,47,71.5,48],["Q",73,49,76,49],["Q",79,49,85.5,44],["Q",92,39,100.5,33],["Q",109,27,113.5,23],["Q",118,19,125.5,16],["Q",133,13,139.5,13.5],["Q",146,14,149,17.5],["Q",152,21,153.5,24],["Q",155,27,156.5,29.5],["Q",158,32,160.5,32.5],["Q",163,33,166,32],["Q",169,31,172,27.5],["Q",175,24,179,20.5],["Q",183,17,185.5,14.5],["Q",188,12,189.5,12],["Q",191,12,192.5,12],["Q",194,12,195.5,15],["Q",197,18,199,19.5],["Q",201,21,203,22.5],["Q",205,24,207.5,24],["Q",210,24,214.5,23.5],["Q",219,23,222.5,20.5],["Q",226,18,229,15.5],["L",232,13]],"pathOffset":{"x":0,"y":0}};
+      var path = {"type":"path","originX":"center","originY":"center","left":173,"top":1800,"width":232,"height":49,"fill":null,"overlayFill":null,"stroke":"#aaf","strokeWidth":10,"strokeDashArray":null,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"selectable":true,"hasControls":true,"hasBorders":true,"hasRotatingPoint":true,"transparentCorners":true,"TargetFind":false,"shadow":{"color":"#aaf","blur":0,"offsetX":0,"offsetY":0},"visible":true,"path":[["M",0,42],["Q",0,42,0,42],["Q",0,42,0.5,42],["Q",1,42,1,41.5],["Q",1,41,3,39],["Q",5,37,10.5,31],["Q",16,25,24.5,18],["Q",33,11,37,8],["Q",41,5,45.5,2.5],["Q",50,0,52.5,0],["Q",55,0,57,0],["Q",59,0,60,3],["Q",61,6,64,19.5],["Q",67,33,68,37],["Q",69,41,69.5,44],["Q",70,47,71.5,48],["Q",73,49,76,49],["Q",79,49,85.5,44],["Q",92,39,100.5,33],["Q",109,27,113.5,23],["Q",118,19,125.5,16],["Q",133,13,139.5,13.5],["Q",146,14,149,17.5],["Q",152,21,153.5,24],["Q",155,27,156.5,29.5],["Q",158,32,160.5,32.5],["Q",163,33,166,32],["Q",169,31,172,27.5],["Q",175,24,179,20.5],["Q",183,17,185.5,14.5],["Q",188,12,189.5,12],["Q",191,12,192.5,12],["Q",194,12,195.5,15],["Q",197,18,199,19.5],["Q",201,21,203,22.5],["Q",205,24,207.5,24],["Q",210,24,214.5,23.5],["Q",219,23,222.5,20.5],["Q",226,18,229,15.5],["L",232,13]],"pathOffset":{"x":116,"y":24.5}};
 
       fabric.Path.fromObject(path, function(path) {
         canvas.add(path);
@@ -387,7 +420,7 @@ title: Features
     });
 
     function animate() {
-      var isStart = Math.round(__image.getLeft()) === 50;
+      var isStart = Math.round(__image.left) === 50;
       __image && __image.animate({
         'left': isStart ? 400 : 50,
         opacity: isStart ? 1 : 0.1,
@@ -396,7 +429,7 @@ title: Features
         scaleY: isStart ? 1 : 0.6
       }, {
         duration: 1500,
-        onChange: __canvas.renderAll.bind(__canvas),
+        onChange: __canvas.requestRenderAllBound,
         onComplete: animate
       });
     }
@@ -413,18 +446,21 @@ title: Features
     <li>Subclassing</li>
     <li>Touch devices support</li>
     <li>Node.js support <em>(and npm package)</em></li>
-    <li>IE&lt;9 support <em>(using excanvas)</em></li>
   </ul>
 
   <p class="next-steps">
     <a href="/demos">Check out <b>demos</b></a>
-    <a href="/fabric-intro-part-1">Read <b>introduction</b></a>
-    <a href="https://github.com/kangax/fabric.js/tags">Download <b>latest version</b></a>
-    <a href="//cdnjs.cloudflare.com/ajax/libs/fabric.js/1.5.0/fabric.min.js">cdnjs (1.5.0)</a>
+    <a href="/fabric-intro-part-1">Read <b>introduction</b></a><br />
+    <a href="//cdnjs.cloudflare.com/ajax/libs/fabric.js/2.4.6/fabric.min.js">Download version <b>2.4.6</b></a><br />
+    or the latest from 1.x version <a href="//cdnjs.cloudflare.com/ajax/libs/fabric.js/1.7.22/fabric.min.js">cdnjs V 1.7.22</a><br />
+    <a href="/fabric-changelog-old"><b>Changelog of 1.x branch</b></a>
   </p>
 
 </div>
 
 <div id="printio-lab-project">
   <a href="http://printio.ru">Printio.ru</a> Lab Project
+</div>
+<div id="changelog">
+  <a href="/changelog"><b>Read the CHANGELOG</b></a>
 </div>

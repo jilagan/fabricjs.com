@@ -1,9 +1,9 @@
 ---
-layout: demo
+layout: demo2
 title: Sliding Ladybugs
 ---
 
-<canvas id="c" width="800" height="400"></canvas>
+<canvas id="c" width="600" height="400"></canvas>
 
 <script id="main">(function() {
   var canvas = this.__canvas = new fabric.Canvas('c', { selection: false });
@@ -15,17 +15,17 @@ title: Sliding Ladybugs
       img.movingLeft = !!Math.round(Math.random());
       canvas.add(img);
     });
-  }, 1000);
+  }, 250);
 
   (function animate() {
-    canvas.forEachObject(function(obj) {
+    canvas.getObjects().concat().forEach(function(obj) {
       obj.left += (obj.movingLeft ? -1 : 1);
       obj.top += 1;
-      if (obj.left > 900 || obj.top > 500) {
+      if (obj.left > 900 || obj.left < -100 || obj.top > 500) {
         canvas.remove(obj);
       }
       else {
-        obj.setAngle(obj.getAngle() + 2);
+        obj.rotate(obj.get('angle') + 2);
       }
     });
     canvas.renderAll();

@@ -1,3 +1,9 @@
+### Running this repo locally
+
+This repo uses [Jekyll](http://jekyllrb.com/) to serve pages, which can be installed [here](http://jekyllrb.com/docs/installation/#install-with-rubygems).
+
+Once installed just run the command `jekyll serve` in your terminal in the root directory of this repo. In the output in your console from this command you will see `Server address: <base_url>`, visit this `base_url` in your browser and you will see the content on `fabricjs.com` with your local changes applied.
+
 ### Not familiar with Fabric?
 
 Best place to start is by going through **[4-part tutorial](/articles)**
@@ -75,5 +81,3 @@ Here's a hierarchy of Fabric's **object model**, to make it easier:
     - [fabric.CircleBrush](/docs/fabric.CircleBrush.html)
     - [fabric.SprayBrush](/docs/fabric.SprayBrush.html)
     - [fabric.PatternBrush](/docs/fabric.PatternBrush.html)
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/kangax/fabricjs.com/trend.png)](https://bitdeli.com/free "Bitdeli Badge")

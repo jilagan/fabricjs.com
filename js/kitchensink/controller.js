@@ -18,11 +18,11 @@ function setActiveStyle(styleName, value, object) {
     object.setCoords();
   }
   else {
-    object[styleName] = value;
+    object.set(styleName, value);
   }
 
   object.setCoords();
-  canvas.renderAll();
+  canvas.requestRenderAll();
 };
 
 function getActiveProp(name) {
@@ -35,12 +35,16 @@ function getActiveProp(name) {
 function setActiveProp(name, value) {
   var object = canvas.getActiveObject();
   if (!object) return;
-
   object.set(name, value).setCoords();
   canvas.renderAll();
 }
 
 function addAccessors($scope) {
+
+  var pattern = new fabric.Pattern({
+    source: '/assets/ladybug.png',
+    repeat: 'repeat'
+  });
 
   $scope.getOpacity = function() {
     return getActiveStyle('opacity') * 100;
@@ -72,7 +76,7 @@ function addAccessors($scope) {
   };
 
   $scope.isUnderline = function() {
-    return getActiveStyle('textDecoration').indexOf('underline') > -1;
+    return getActiveStyle('textDecoration').indexOf('underline') > -1 || getActiveStyle('underline');
   };
   $scope.toggleUnderline = function() {
     var value = $scope.isUnderline()
@@ -80,10 +84,11 @@ function addAccessors($scope) {
       : (getActiveStyle('textDecoration') + ' underline');
 
     setActiveStyle('textDecoration', value);
+    setActiveStyle('underline', !getActiveStyle('underline'));
   };
 
   $scope.isLinethrough = function() {
-    return getActiveStyle('textDecoration').indexOf('line-through') > -1;
+    return getActiveStyle('textDecoration').indexOf('line-through') > -1 || getActiveStyle('linethrough');
   };
   $scope.toggleLinethrough = function() {
     var value = $scope.isLinethrough()
@@ -91,9 +96,10 @@ function addAccessors($scope) {
       : (getActiveStyle('textDecoration') + ' line-through');
 
     setActiveStyle('textDecoration', value);
+    setActiveStyle('linethrough', !getActiveStyle('linethrough'));
   };
   $scope.isOverline = function() {
-    return getActiveStyle('textDecoration').indexOf('overline') > -1;
+    return getActiveStyle('textDecoration').indexOf('overline') > -1 || getActiveStyle('overline');
   };
   $scope.toggleOverline = function() {
     var value = $scope.isOverline()
@@ -101,6 +107,7 @@ function addAccessors($scope) {
       : (getActiveStyle('textDecoration') + ' overline');
 
     setActiveStyle('textDecoration', value);
+    setActiveStyle('overline', !getActiveStyle('overline'));
   };
 
   $scope.getText = function() {
@@ -138,10 +145,10 @@ function addAccessors($scope) {
     setActiveProp('textBackgroundColor', value);
   };
 
-  $scope.getStrokeColor = function() {
+  $scope.getStroke = function() {
     return getActiveStyle('stroke');
   };
-  $scope.setStrokeColor = function(value) {
+  $scope.setStroke = function(value) {
     setActiveStyle('stroke', value);
   };
 
@@ -165,6 +172,12 @@ function addAccessors($scope) {
   $scope.setLineHeight = function(value) {
     setActiveStyle('lineHeight', parseFloat(value, 10));
   };
+  $scope.getCharSpacing = function() {
+    return getActiveStyle('charSpacing');
+  };
+  $scope.setCharSpacing = function(value) {
+    setActiveStyle('charSpacing', value);
+  };
 
   $scope.getBold = function() {
     return getActiveStyle('fontWeight');
@@ -173,12 +186,58 @@ function addAccessors($scope) {
     setActiveStyle('fontWeight', value ? 'bold' : '');
   };
 
+  $scope.setPatternStyle = function(value) {
+    var obj = canvas.getActiveObject();
+    if (obj && obj.fill instanceof fabric.Pattern) {
+      obj.fill.repeat = value;
+      obj.dirty = true;
+      canvas.requestRenderAll();
+    }
+  };
+
+  $scope.hasPattern = function() {
+    return getActiveStyle('fill') instanceof fabric.Pattern;
+  };
+
+  $scope.getPatternRepeat = function() {
+    if ($scope.hasPattern()) {
+      return getActiveStyle('fill').repeat;
+    }
+  };
+
+  $scope.addResizeFilter = function() {
+    setActiveStyle('resizeFilter', new fabric.Image.filters.Resize());
+    canvas.requestRenderAll();
+  }
+
+  $scope.addInvertFilter = function() {
+    setActiveStyle('filters', [new fabric.Image.filters.Invert()]);
+    var obj = canvas.getActiveObject();
+    obj.applyFilters && obj.applyFilters();
+  }
+
+  $scope.addContrastFilter = function() {
+    setActiveStyle('filters', [new fabric.Image.filters.Contrast({ contrast: 0.7 })]);
+    var obj = canvas.getActiveObject();
+    obj.applyFilters && obj.applyFilters();
+  }
+
   $scope.getCanvasBgColor = function() {
     return canvas.backgroundColor;
   };
   $scope.setCanvasBgColor = function(value) {
     canvas.backgroundColor = value;
     canvas.renderAll();
+  };
+
+  $scope.setSubScript = function() {
+    var obj = canvas.getActiveObject();
+    obj.setSubScript();
+  };
+
+  $scope.setSuperScript = function() {
+    var obj = canvas.getActiveObject();
+    obj.setSuperScript();
   };
 
   $scope.addRect = function() {
@@ -264,6 +323,48 @@ function addAccessors($scope) {
     canvas.add(textSample);
   };
 
+  $scope.addTextbox = function() {
+    var text = 'Lorem ipsum dolor sit amet,\nconsectetur adipisicing elit,\nsed do eiusmod tempor incididunt\nut labore et dolore magna aliqua.\n' +
+      'Ut enim ad minim veniam,\nquis nostrud exercitation ullamco\nlaboris nisi ut aliquip ex ea commodo consequat.';
+
+    var textSample = new fabric.Textbox(text.slice(0, getRandomInt(0, text.length)), {
+      fontSize: 20,
+      left: getRandomInt(350, 400),
+      top: getRandomInt(350, 400),
+      fontFamily: 'helvetica',
+      angle: getRandomInt(-10, 10),
+      fill: '#' + getRandomColor(),
+      fontWeight: '',
+      originX: 'left',
+      width: 300,
+      hasRotatingPoint: true,
+      centerTransform: true
+    });
+
+    canvas.add(textSample);
+  };
+
+  $scope.addIText = function() {
+    var text = 'Lorem ipsum dolor sit amet,\nconsectetur adipisicing elit,\nsed do eiusmod tempor incididunt\nut labore et dolore magna aliqua.\n' +
+      'Ut enim ad minim veniam,\nquis nostrud exercitation ullamco\nlaboris nisi ut aliquip ex ea commodo consequat.';
+
+    var textSample = new fabric.IText(text.slice(0, getRandomInt(0, text.length)), {
+      left: getRandomInt(350, 400),
+      top: getRandomInt(350, 400),
+      fontFamily: 'helvetica',
+      angle: getRandomInt(-10, 10),
+      fill: '#' + getRandomColor(),
+      scaleX: 0.5,
+      scaleY: 0.5,
+      fontWeight: '',
+      originX: 'left',
+      hasRotatingPoint: true,
+      centerTransform: true
+    });
+
+    canvas.add(textSample);
+  };
+
   var addShape = function(shapeName) {
 
     console.log('adding shape', shapeName);
@@ -283,6 +384,19 @@ function addAccessors($scope) {
 
       canvas.add(loadedObject);
     });
+  };
+
+  $scope.addPatternRect = function() {
+    var coord = getRandomLeftTop();
+    var rect = new fabric.Rect({
+      width: 300,
+      height: 300,
+      left: coord.left,
+      top: coord.top,
+      angle: getRandomInt(-10, 10),
+      fill: pattern,
+    });
+    canvas.add(rect);
   };
 
   $scope.maybeLoadShape = function(e) {
@@ -324,25 +438,50 @@ function addAccessors($scope) {
     addImage('printio.png', 0.5, 0.75);
   };
 
+  $scope.addImage4 = function() {
+    var src = 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+    var video1El = document.createElement('video');
+    video1El.crossOrigin = 'anonymous';
+    video1El.src = src;
+    video1El.addEventListener('loadeddata', function() {
+        // Video is loaded and can be played
+       var coord = getRandomLeftTop();
+       var video = new fabric.Image(video1El, {
+         left: coord.left,
+         top: coord.top,
+         angle: getRandomInt(-10, 10)
+       });
+       canvas.add(video);
+    }, false);
+    video1El.width = 384;
+    video1El.height = 206;
+    //video1El.style.display = 'none';
+    document.body.appendChild(video1El);
+    video1El.load();
+  };
+
   $scope.confirmClear = function() {
     if (confirm('Are you sure?')) {
       canvas.clear();
     }
   };
 
-  $scope.rasterize = function() {
+  $scope.rasterize3x = function() {
+    $scope.rasterize(3);
+  }
+
+  $scope.rasterize = function(multiplier) {
     if (!fabric.Canvas.supports('toDataURL')) {
       alert('This browser doesn\'t provide means to serialize canvas to an image');
     }
     else {
-      window.open(canvas.toDataURL('png'));
+      var data = canvas.toDataURL({ multiplier: multiplier, format: 'png' });
+      document.getElementById('canvasRasterizer').src = data;
     }
   };
 
   $scope.rasterizeSVG = function() {
-    window.open(
-      'data:image/svg+xml;utf8,' +
-      encodeURIComponent(canvas.toSVG()));
+    document.getElementById('SVGRasterizer').innerHTML = canvas.toSVG();
   };
 
   $scope.rasterizeJSON = function() {
@@ -354,19 +493,18 @@ function addAccessors($scope) {
   };
 
   $scope.removeSelected = function() {
-    var activeObject = canvas.getActiveObject(),
-        activeGroup = canvas.getActiveGroup();
+    var activeObjects = canvas.getActiveObjects();
+    canvas.discardActiveObject()
+    if (activeObjects.length) {
+      canvas.remove.apply(canvas, activeObjects);
+    }
+  };
 
-    if (activeGroup) {
-      var objectsInGroup = activeGroup.getObjects();
-      canvas.discardActiveGroup();
-      objectsInGroup.forEach(function(object) {
-        canvas.remove(object);
-      });
-    }
-    else if (activeObject) {
-      canvas.remove(activeObject);
-    }
+  $scope.getLockScalingFlip = function() {
+    return getActiveProp('lockScalingFlip');
+  };
+  $scope.setLockScalingFlip = function(value) {
+    setActiveProp('lockScalingFlip', value);
   };
 
   $scope.getHorizontalLock = function() {
@@ -405,17 +543,68 @@ function addAccessors($scope) {
   };
 
   $scope.getOriginX = function() {
-    return getActiveProp('originX');
+    return getActiveProp('originX') + '';
   };
+
   $scope.setOriginX = function(value) {
-    setActiveProp('originX', value);
+    var num = parseFloat(value);
+    setActiveProp('originX', isNaN(num) ? value : num);
+  };
+
+  $scope.setCenteredRotation = function(value) {
+    setActiveProp('centeredRotation', value);
+  };
+
+  $scope.getCenteredRotation = function(value) {
+    return getActiveProp('centeredRotation');
   };
 
   $scope.getOriginY = function() {
-    return getActiveProp('originY');
+    return getActiveProp('originY') + '';
   };
   $scope.setOriginY = function(value) {
-    setActiveProp('originY', value);
+    var num = parseFloat(value);
+    setActiveProp('originY', isNaN(num) ? value : num);
+  };
+
+  $scope.getObjectCaching = function() {
+    return getActiveProp('objectCaching');
+  };
+
+  $scope.setObjectCaching = function(value) {
+    return setActiveProp('objectCaching', value);
+  };
+
+  $scope.getNoScaleCache = function() {
+    return getActiveProp('noScaleCache');
+  };
+
+  $scope.setNoScaleCache = function(value) {
+    return setActiveProp('noScaleCache', value);
+  };
+
+  $scope.getTransparentCorners = function() {
+    return getActiveProp('transparentCorners');
+  };
+
+  $scope.setTransparentCorners = function(value) {
+    return setActiveProp('transparentCorners', value);
+  };
+
+  $scope.getHasBorders = function() {
+    return getActiveProp('hasBorders');
+  };
+
+  $scope.setHasBorders = function(value) {
+    return setActiveProp('hasBorders', value);
+  };
+
+  $scope.getHasControls = function() {
+    return getActiveProp('hasControls');
+  };
+
+  $scope.setHasControls = function(value) {
+    return setActiveProp('hasControls', value);
   };
 
   $scope.sendBackwards = function() {
@@ -446,29 +635,32 @@ function addAccessors($scope) {
     }
   };
 
-  var pattern = new fabric.Pattern({
-    source: '/assets/escheresque.png',
-    repeat: 'repeat'
-  });
-
   $scope.patternify = function() {
     var obj = canvas.getActiveObject();
 
     if (!obj) return;
 
     if (obj.fill instanceof fabric.Pattern) {
-      obj.fill = null;
+      obj.set('fill', null);
     }
     else {
-      if (obj instanceof fabric.PathGroup) {
-        obj.getObjects().forEach(function(o) { o.fill = pattern; });
-      }
-      else {
-        obj.fill = pattern;
-      }
+      obj.set('fill', pattern);
     }
     canvas.renderAll();
   };
+
+  $scope.play = function() {
+    var obj = canvas.getActiveObject();
+
+    if (!obj || !obj.getElement || !obj.getElement().play) return;
+    obj.getElement().play();
+    renderLoop();
+  };
+
+  function renderLoop() {
+    canvas.requestRenderAll();
+    window.requestAnimationFrame(renderLoop);
+  }
 
   $scope.clip = function() {
     var obj = canvas.getActiveObject();
@@ -598,7 +790,9 @@ function addAccessors($scope) {
 
   var _loadSVGWithoutGrouping = function(svg) {
     fabric.loadSVGFromString(svg, function(objects) {
+      canvas.renderOnAddRemove = false;
       canvas.add.apply(canvas, objects);
+      canvas.renderOnAddRemove = true;
       canvas.renderAll();
     });
   };
@@ -713,6 +907,31 @@ function addAccessors($scope) {
   addTexts();
 
 
+  $scope.getPreserveObjectStacking = function() {
+    return canvas.preserveObjectStacking;
+  };
+  $scope.setPreserveObjectStacking = function(value) {
+    return canvas.preserveObjectStacking = value;
+  };
+
+  $scope.getEnableRetinaScaling = function() {
+    return canvas.enableRetinaScaling;
+  };
+  $scope.setEnableRetinaScaling = function(value) {
+    canvas.enableRetinaScaling = value;
+    canvas.setDimensions({
+      width: canvas.width,
+      height: canvas.height });
+    return value
+  };
+
+  $scope.getSkipOffscreen = function() {
+    return canvas.skipOffscreen;
+  };
+  $scope.setSkipOffscreen = function(value) {
+    return canvas.skipOffscreen = value;
+  };
+
   $scope.getFreeDrawingMode = function() {
     return canvas.isDrawingMode;
   };
@@ -825,7 +1044,7 @@ function addAccessors($scope) {
         fill: this.color
       });
 
-      var canvasWidth = rect.getBoundingRectWidth();
+      var canvasWidth = rect.getBoundingRect().width;
 
       patternCanvas.width = patternCanvas.height = canvasWidth + squareDistance;
       rect.set({ left: canvasWidth / 2, top: canvasWidth / 2 });
@@ -904,7 +1123,6 @@ function watchCanvas($scope) {
 
   canvas
     .on('object:selected', updateScope)
-    .on('group:selected', updateScope)
     .on('path:created', updateScope)
     .on('selection:cleared', updateScope);
 }

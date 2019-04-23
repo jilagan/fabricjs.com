@@ -11,7 +11,7 @@ title: Tests
     {% for post in site.categories.benchmarks %}
       <li><a href="../{{ post.url }}">{{ post.title }}</a></li>
     {% endfor %}
-    <li style="margin-top: 20px"><a style="color: red" href="/report">Comlpexity report</a></li>
+    <li style="margin-top: 20px"><a style="color: red" href="/report">Complexity report</a></li>
   </ul>
 </div>
 
@@ -19,7 +19,8 @@ title: Tests
   <h2>Tests</h2>
 
   <ul id="tests">
-    <li><a href="unit/">Unit Tests</a></li>
+    <li><a href="unit/?coverage&hidepassed">Unit Tests</a></li>
+    <li><a href="visual/?coverage&hidepassed">Automated Visual Tests</a></li>
     <li><a href="functional/">Functional Tests</a></li>
     <li><a href="node/">Node.js Tests</a></li>
     <li>
@@ -29,18 +30,14 @@ title: Tests
         <li><a href="svg_import/stroke.html">Stroke</a></li>
         <li><a href="svg_import/gradients.html">Gradients</a></li>
         <li><a href="svg_import/text.html">Text</a></li>
+        <li><a href="svg_import/clippaths.html">Clip paths</a></li>
       </ul>
     </li>
     <li>
       SVG Export Tests
       <ul style="margin-top:5px">
         <li><a href="svg_export">Basic geometric shapes, images</a></li>
-        <li>
-          <a href="svg_export/text.html#native">Text (native)</a>
-          <ul>
-            <li><a href="svg_export/text.html">Text (Cufon, deprecated)</a></li>
-          </ul>
-        </li>
+        <li><a href="svg_export/text.html">Text (native)</a></li>
         <li><a href="svg_export/svg_shapes.html">Complex shapes</a></li>
         <li><a href="svg_export/bg_patterns_gradients.html">Background, overlay, patterns, gradients</a></li>
         <li><a href="svg_export/stroke.html">Stroke</a></li>
@@ -55,12 +52,5 @@ title: Tests
         <li><a href="misc/position.html">Canvas position</a></li>
       </ul>
     </li>
-    <li>
-      Automated visual testing
-      <ul style="margin-top:5px">
-        <li><a href="automated_visual/stroke.html">Stroke</a></li>
-      </ul>
-    </li>
   </ul>
-
 </div>
